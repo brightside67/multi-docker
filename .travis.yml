@@ -1,0 +1,22 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t brightside67/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run brightside67/react-test npm -v
+
+after_success:
+  - docker build -t brightside67/multi-client ./client
+  - docker build -t brightside67/multi-nginx ./nginx
+  - docker build -t brightside67/multi-server ./server
+  - docker build -t brightside67/multi-worker ./worker
+  #login into docker
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # push images to dokcer hub
+  - docker push brightside67/multi-client
+  - docker push brightside67/multi-nginx
+  - docker push brightside67/multi-server
+  - docker push brightside67/multi-worker
